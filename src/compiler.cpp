@@ -1,72 +1,29 @@
 #include <iostream>
 #include <fstream>
+#include <map>
 
-class DummyTrie {
-protected:
-   int frequency;
-   DummyTrie* sons[128];
-
-public:
-    DummyTrie() :
-        frequency(0)
-    {
-        for (int i = 0; i < 128; i++) {
-            sons[i] = NULL;
-        }
-    }
-
-    void Add(std::string word, int position, int freq) {
-        int letter = word[position];
-
-        if (word.length() == position) {
-            frequency = freq;
-            return;
-        }
-
-        if (NULL == sons[letter]) {
-            sons[letter] = new DummyTrie();
-        }
-
-        sons[letter]->Add(word, position + 1, freq);
-    }
-
-    void Dump(std::ofstream& file) {
-        for (int i = 0; i < 128; i++) {
-            if (sons[i])
-                sons[i]->Dump(file);
-        }
-
-        if (frequency)
-            file << "me, freq:" << frequency << std::endl;
-
-        for (int i = 0; i < 128; i++) {
-            if (sons[i]) {
-                file << "--(" << i << ")-->" << std::endl;
-            }
-        }
-    }
-};
+#include "trie-dummy.hpp"
 
 
 int main(int argc, char** argv) {
     std::ifstream file_in (argv[1]);
+    int count = 0;
 
-    std::string word;
     DummyTrie root;
+    std::string word;
     int freq;
 
+
     while (not file_in.eof()) {
+        count++;
         file_in >> word;
         file_in >> freq;
-        root.Add(word, 0, freq);
-
-        std::cout << "word: " << word << " freq: " << freq << std::endl;
+        root.Add(word, freq);
     }
     file_in.close();
+    std::cout << count << " words added" << std::endl;
 
-    std::ofstream file_out (argv[2]);
-    root.Dump(file_out);
-    file_out.close();
+    root.DumpRoot(argv[2]);
 
     return 0;
 }
