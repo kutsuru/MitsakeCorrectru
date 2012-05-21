@@ -3,13 +3,13 @@
 #include <map>
 
 #include "trie-dummy.hpp"
-
+#include "trie-fast.hpp"
 
 int main(int argc, char** argv) {
     std::ifstream file_in (argv[1]);
     int count = 0;
 
-    DummyTrie root;
+    mitsake::DummyTrie root;
     std::string word;
     int freq;
 
@@ -22,6 +22,9 @@ int main(int argc, char** argv) {
     }
     file_in.close();
     std::cout << count << " words added" << std::endl;
+    std::cout << sizeof(const char) << "size" << std::endl;
+    std::cout << sizeof(const int) << "size" << std::endl;
+    std::cout << sizeof(mitsake::TrieLink) << "link" << std::endl;
 
     root.DumpRoot(argv[2]);
 

@@ -1,6 +1,9 @@
 #ifndef TRIEDUMMY_HPP
 #define TRIEDUMMY_HPP
 
+
+namespace mitsake {
+
 class DummyTrie {
 protected:
    unsigned int frequency;
@@ -45,5 +48,7 @@ public:
         file_out.close();
     }
 };
+
+}
 
 #endif

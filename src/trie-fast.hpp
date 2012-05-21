@@ -9,18 +9,13 @@ namespace mitsake {
     } __attribute__((packed));
 
     struct s_TrieLink {
-        unsigned int letter   : 7;
-        unsigned int is_final : 1;
+        const char   letter      : 6;
+        const char   d_to_offset : 2;
     } __attribute__((packed));
 
     typedef struct s_TrieNode TrieNode;
     typedef struct s_TrieLink TrieLink;
     typedef unsigned int NodeOffset;
-
-    union u_NodeInfo {
-        NodeOffset offset;
-        TrieLink   link;
-    } NodeInfo;
 }
 
 #endif
