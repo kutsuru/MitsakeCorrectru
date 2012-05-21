@@ -16,8 +16,9 @@ int main(int argc, char** argv) {
     int fd = open(argv[1], O_RDONLY);
     void* mapped = mmap(0, fs.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 
-    int offset = ((int*)mapped)[0];
-    std::cout << "offset:" << offset;
+    std::cout << "size:" << fs.st_size << std::endl;
+    std::cout << "mapped:" << mapped << std::endl;
+    std::cout << "offset:" << ((unsigned int*)mapped)[0] << std::endl;
 
     return 0;
 }

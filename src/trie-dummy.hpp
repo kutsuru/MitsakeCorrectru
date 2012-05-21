@@ -54,7 +54,7 @@ public:
             // LETTER
             // NODE OFFSET
             file.write((const char*)&tl, sizeof(mitsake::TrieLink));
-            file << offset;
+            file.write((char*)&offset, sizeof(unsigned int));
         }
 
         return position;
@@ -63,12 +63,12 @@ public:
     void DumpRoot(char* filepath) {
         std::ofstream file_out (filepath, std::ios::binary);
         file_out.seekp(4);
-        int offset = Dump(file_out);
+        unsigned int offset = Dump(file_out);
         file_out.seekp(0);
-        file_out << offset;
+        file_out.write((char*)&offset, sizeof(unsigned int));
         file_out.close();
 
-        std::cout << "offset:" << offset;
+        std::cout << "offset:" << offset << std::endl;
     }
 };
 
