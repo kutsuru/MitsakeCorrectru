@@ -1,51 +1,74 @@
 #ifndef TRIEDUMMY_HPP
 #define TRIEDUMMY_HPP
 
+#include <map>
+#include <stdio.h>
+#include "trie-fast.hpp"
 
 namespace mitsake {
 
-class DummyTrie {
+class TrieDummy {
 protected:
-   unsigned int frequency;
-   std::map<const char, DummyTrie*> sons;
+    typedef std::map<const char, TrieDummy*> mapsons;
+    typedef std::map<const char, unsigned int> mapsonsoffset;
+    unsigned int frequency;
+    mapsons sons;
 
 public:
-    DummyTrie() : frequency(0) {}
+    TrieDummy() : frequency(0) {}
 
     void Add(std::string word, int freq) {
-        DummyTrie* current = this;
+        TrieDummy* current = this;
 
         for (unsigned int i = 0; i < word.length(); i++) {
             const char letter = word[i];
 
             if (current->sons.find(letter) == current->sons.end()) {
-                current->sons[letter] = new DummyTrie();
+                current->sons[letter] = new TrieDummy();
             }
             current = current->sons[letter];
         }
         current->frequency = freq;
     }
 
-    void Dump(std::ofstream& file) {
-        for (int i = 0; i < 128; i++) {
-            if (sons[i])
-                sons[i]->Dump(file);
+    unsigned int Dump(std::ofstream& file) {
+        int position;
+        mapsonsoffset mso;
+
+        for (mapsons::iterator it = sons.begin(); it != sons.end(); it++) {
+            mso[(*it).first] = (*it).second->Dump(file);
         }
 
-        if (frequency)
-            file << "me, freq:" << frequency << std::endl;
+        position = file.tellp();
+        mitsake::TrieNode node(frequency, sons.size());
 
-        for (int i = 0; i < 128; i++) {
-            if (sons[i]) {
-                file << "--(" << i << ")-->" << std::endl;
-            }
+        // NODE_VALUE
+        // CHILD_COUNT
+        file.write((const char*)&node, sizeof(mitsake::TrieNode));
+
+        // LINKS
+        for (mapsons::iterator it = sons.begin(); it != sons.end(); it++) {
+            TrieLink tl((*it).first, 0);
+            unsigned int offset = mso[(*it).first];
+
+            // LETTER
+            // NODE OFFSET
+            file.write((const char*)&tl, sizeof(mitsake::TrieLink));
+            file << offset;
         }
+
+        return position;
     }
 
     void DumpRoot(char* filepath) {
         std::ofstream file_out (filepath, std::ios::binary);
-        Dump(file_out);
+        file_out.seekp(4);
+        int offset = Dump(file_out);
+        file_out.seekp(0);
+        file_out << offset;
         file_out.close();
+
+        std::cout << "offset:" << offset;
     }
 };
 

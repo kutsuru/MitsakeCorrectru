@@ -9,10 +9,9 @@ int main(int argc, char** argv) {
     std::ifstream file_in (argv[1]);
     int count = 0;
 
-    mitsake::DummyTrie root;
+    mitsake::TrieDummy root;
     std::string word;
     int freq;
-
 
     while (not file_in.eof()) {
         count++;
