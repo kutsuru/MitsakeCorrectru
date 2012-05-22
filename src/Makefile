@@ -10,3 +10,7 @@ app: app.cpp trie-dummy.hpp trie-fast.hpp
 test: compiler app
 	./compiler ./testing.txt ./out.bin
 	./app ./out.bin
+
+clean:
+	rm -f compiler app
+	rm -f *.bin
