@@ -19,12 +19,11 @@ int main(int argc, char** argv) {
         file_in >> freq;
         root.Add(word, freq);
     }
+
     file_in.close();
     std::cout << count << " words added" << std::endl;
-    std::cout << sizeof(const char) << "size" << std::endl;
-    std::cout << sizeof(const int) << "size" << std::endl;
-    std::cout << sizeof(mitsake::TrieLink) << "link" << std::endl;
 
+    root.Print("");
     root.DumpRoot(argv[2]);
 
     return 0;

@@ -60,6 +60,14 @@ public:
         return position;
     }
 
+    void Print(std::string previous) {
+        for (mapsons::iterator it = sons.begin(); it != sons.end(); it++) {
+            std::cout << previous << " -> " << (*it).first << std::endl;
+            (*it).second->Print(previous + (*it).first);
+        }
+    }
+
+
     void DumpRoot(char* filepath) {
         std::ofstream file_out (filepath, std::ios::binary);
         file_out.seekp(4);
