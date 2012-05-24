@@ -10,7 +10,7 @@ namespace mitsake {
 class TrieDummy {
 protected:
     typedef std::map<const char, TrieDummy*> mapsons;
-    typedef std::map<const char, unsigned int> mapsonsoffset;
+    typedef std::map<const char, long> mapsonsoffset;
     unsigned int frequency;
     mapsons sons;
 
@@ -32,7 +32,7 @@ public:
     }
 
     unsigned int Dump(std::ofstream& file) {
-        int position;
+        long position;
         mapsonsoffset mso;
 
         for (mapsons::iterator it = sons.begin(); it != sons.end(); it++) {
@@ -40,21 +40,25 @@ public:
         }
 
         position = file.tellp();
-        mitsake::TrieNode node(frequency, sons.size());
+        int child_count = sons.size();
 
         // NODE_VALUE
         // CHILD_COUNT
-        file.write((const char*)&node, sizeof(mitsake::TrieNode));
+        file.write((const char*)&frequency, sizeof(unsigned int));
+        file.write((const char*)&child_count, sizeof(unsigned int));
+
+        std::cout << "freq: " << frequency << std::endl;
 
         // LINKS
         for (mapsons::iterator it = sons.begin(); it != sons.end(); it++) {
-            TrieLink tl((*it).first, 0);
-            unsigned int offset = mso[(*it).first];
+            TrieLinkLetter letter((*it).first, 1);
+            TrieLinkLetter end(1, 1); //TODO: Compress!
+            long offset = position - mso[(*it).first];
 
-            // LETTER
+            // LETTERS
             // NODE OFFSET
+            TrieLink tl(letter, end, end, end, offset);
             file.write((const char*)&tl, sizeof(mitsake::TrieLink));
-            file.write((char*)&offset, sizeof(unsigned int));
         }
 
         return position;
@@ -70,7 +74,7 @@ public:
 
     void DumpRoot(char* filepath) {
         std::ofstream file_out (filepath, std::ios::binary);
-        file_out.seekp(4);
+        file_out.seekp((sizeof(unsigned int)));
         unsigned int offset = Dump(file_out);
         file_out.seekp(0);
         file_out.write((char*)&offset, sizeof(unsigned int));
