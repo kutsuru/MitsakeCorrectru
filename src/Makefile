@@ -14,6 +14,11 @@ test: compiler app
 	./compiler ./testing.txt ./out.bin
 	./app ./out.bin
 
+check1: compiler app
+	./compiler ./testing.txt ./out.bin
+	./app ./out.bin > result
+	diff result ./testing.txt
+
 clean:
 	rm -f compiler app
 	rm -f *.bin
