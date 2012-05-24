@@ -17,6 +17,12 @@ protected:
 public:
     TrieDummy() : frequency(0) {}
 
+    ~TrieDummy() {
+        for (mapsons::iterator it = sons.begin(); it != sons.end(); it++) {
+            delete sons[(*it).first];
+        }
+    }
+
     void Add(std::string word, int freq) {
         TrieDummy* current = this;
 
