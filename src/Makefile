@@ -1,11 +1,14 @@
 
+CXX=g++
+FLAGS=-g -ggdb -pedantic -Wall
+
 all: compiler app
 
 compiler: compiler.cpp trie-dummy.hpp trie-fast.hpp
-	g++ compiler.cpp -o compiler
+	${CXX} compiler.cpp -o compiler ${FLAGS}
 
 app: app.cpp trie-dummy.hpp trie-fast.hpp
-	g++ app.cpp -o app
+	${CXX} app.cpp -o app ${FLAGS}
 
 test: compiler app
 	./compiler ./testing.txt ./out.bin
