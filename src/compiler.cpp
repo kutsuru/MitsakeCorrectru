@@ -21,9 +21,9 @@ int main(int argc, char** argv) {
     }
 
     file_in.close();
-    std::cout << count << " words added" << std::endl;
+    // std::cout << count << " words added" << std::endl;
 
-    root.Print("");
+    // root.Print("");
     root.DumpRoot(argv[2]);
 
     return 0;

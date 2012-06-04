@@ -53,7 +53,7 @@ public:
         file.write((const char*)&frequency, sizeof(unsigned int));
         file.write((const char*)&child_count, sizeof(unsigned int));
 
-        std::cout << "freq: " << frequency << std::endl;
+        // std::cout << "freq: " << frequency << std::endl;
 
         // LINKS
         for (mapsons::iterator it = sons.begin(); it != sons.end(); it++) {
@@ -72,7 +72,7 @@ public:
 
     void Print(std::string previous) {
         for (mapsons::iterator it = sons.begin(); it != sons.end(); it++) {
-            std::cout << previous << " -> " << (*it).first << std::endl;
+            // std::cout << previous << " -> " << (*it).first << std::endl;
             (*it).second->Print(previous + (*it).first);
         }
     }
