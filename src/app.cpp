@@ -10,22 +10,23 @@
 #include "trie-dummy.hpp"
 #include "trie-fast.hpp"
 
-#define DEBUG_DIST 1
+#define DEBUG_DIST 0
 #define DEBUG_DESCENT 0
 #define DEBUG_DEL 0
 #define DEBUG_SUB 0
-#define DEBUG_INS 1
+#define DEBUG_INS 0
 
 using namespace mitsake;
 
 
-static std::map<std::string, unsigned int> suggestion;
+static std::map<std::string, std::pair<unsigned int, unsigned int> > suggestion;
 
 void node_call(TrieNode* node, std::string previous) {
 
-    if (node->frequency > 0) {
+    if (node->frequency > 0)
+#if DEBUG_DESCENT
         std::cout << previous << "\t" << node->frequency << std::endl;
-    }
+#endif
 
     for (unsigned int i = 0; i < node->child_count; i++) {
         TrieLink* link = &(((TrieLink*)(&(node[1])))[i]);
@@ -74,7 +75,10 @@ int compute_distance(TrieNode* node, std::string previous, std::string word,
 
 #if DEBUG_DIST
     std::cout << "Current Node -> " << previous << " : "
-        << node->child_count << " children, dist = " << distance << std::endl;
+        << node->child_count << " children, dist = " << distance
+        << ", treshold : " << treshold 
+        << ", label : " << previous << ", index : " << index
+        << std::endl;
 #endif
 
 
@@ -84,12 +88,18 @@ int compute_distance(TrieNode* node, std::string previous, std::string word,
         std::cout << "Working word : " << previous << std::endl;
 #endif
 
-        suggestion.insert(std::pair<std::string, unsigned int>
-                (previous, node->frequency));
-        result = length;
+        if (length - (index + 1) < treshold);
+        if (distance + length - (index + 1) < treshold)
+        {
+            std::pair<unsigned int, unsigned int> df(distance, node->frequency);
+
+            suggestion.insert(std::pair<std::string, std::pair<unsigned int, unsigned int> >
+                    (previous, df));
+            result = length;
+        }
     }
 
-    if (distance + 1 <= treshold)
+    if (distance <= treshold)
     {
         // Deletion step
         int deletion = compute_distance(node, previous, word, index + 1,
@@ -114,16 +124,21 @@ int compute_distance(TrieNode* node, std::string previous, std::string word,
 #if DEBUG_DIST && DEBUG_SUB
             std::cout << "Length : " << length
                 << ", Index : " << index
-                << ", Current label : " << next[index]
+                << ", Current label : " << link->l1.letter
                 << ", Current character : " << word[index]
                 << std::endl;
 #endif
 
             //Substitution step
-            if (length > index + 1 && link->l1.letter == word[index])
+            if (length > index && (link->l1.letter == (127 & word[index])))
                 mdistance = 0;
             else
                 mdistance = 1;
+
+#if DEBUG_DIST && DEBUG_SUB      
+            std::cout << "Substitution step ==> "
+                <<  "label : " << next << ", dist : " << distance << ", mdist : " << mdistance << std::endl;
+#endif
 
             int substitution = compute_distance(son, next, word, index + 1,
                     length, distance + mdistance,
@@ -131,8 +146,13 @@ int compute_distance(TrieNode* node, std::string previous, std::string word,
             result = std::min(result, substitution);
 
 #if DEBUG_DIST && DEBUG_SUB      
-            std::cout << "Substitution step ==> sub : " << substitution
-                << " , result : " << result << std::endl;
+            std::cout << "Substitution after step ==> sub : " << substitution
+                << " , result : " << result << ", label : " << next << ", dist : " << distance << std::endl;
+#endif
+
+#if DEBUG_DIST && DEBUG_INS
+            std::cout << "Insertion step ==> "
+                <<  "label : " << next << ", dist : " << distance << std::endl;
 #endif
 
             // Insertion step
@@ -141,24 +161,19 @@ int compute_distance(TrieNode* node, std::string previous, std::string word,
 
             result = std::min(result, insertion);
 
+#if DEBUG_DIST && DEBUG_INS
+            std::cout << "Insertion after step ==> ins : " << insertion
+                << " , result : " << result << ", label : " << next << ", dist : " << distance << std::endl;
+#endif
+
+
             // Transposition step
 
-
-#if DEBUG_DIST && DEBUG_INS
-            std::cout << "Insertion step ==> ins : " << insertion
-                << " , result : " << result << std::endl;
-#endif
         }
     }
 
     return result;
 }
-
-void test(std::pair<std::string, unsigned int>* p)
-{
-    std::cout << "(" << p->first << "," << p->second << ")" << std::endl;
-}
-
 
 int main(int argc, char** argv) {
 
@@ -195,8 +210,7 @@ int main(int argc, char** argv) {
                 if (command.compare("approx") == 0)
                     std::cout << "Result : "
                         << compute_distance(root, "", word, 0,
-                                word.length(), 0,
-                                treshold)
+                                       word.length(), 0, treshold)
                         << std::endl;
 
                 else
@@ -211,9 +225,23 @@ int main(int argc, char** argv) {
                         });
 #endif
 
-                for (std::map<std::string, unsigned int>::iterator it = suggestion.begin( );
+                std::map<std::string, std::pair<unsigned int, unsigned int> >::iterator rit = suggestion.end();
+                --rit; // Save the iterator before the last element
+
+                std::cout << "[";
+                
+                for (std::map<std::string, std::pair<unsigned int, unsigned int> >::iterator it = suggestion.begin();
                      it != suggestion.end( ) ; ++it)
-                    std::cout << "(" << it->first << ", " << it->second << ")" << std::endl;
+                {
+                    std::cout << "{\"word\":\"" << it->first
+                              << "\",\"freq\":" << it->second.second
+                              << ",\"distance\":" << it->second.first << "}";
+
+                    if (it != rit)
+                        std::cout << ",";
+                }
+
+                std::cout << "]" << std::endl;
             }
         }
         else

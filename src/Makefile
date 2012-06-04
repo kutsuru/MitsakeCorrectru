@@ -1,6 +1,7 @@
 
 CXX=g++
 FLAGS=-g -ggdb -pedantic -Wall
+FLAGS= -O3 -pedantic -Wall
 
 all: compiler app
 
