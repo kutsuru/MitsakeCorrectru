@@ -10,11 +10,12 @@
 #include "trie-dummy.hpp"
 #include "trie-fast.hpp"
 
-#define DEBUG_DIST 0
+#define DEBUG_DIST 1
 #define DEBUG_DESCENT 0
 #define DEBUG_DEL 0
 #define DEBUG_SUB 0
 #define DEBUG_INS 0
+#define DEBUG_TRANS 1
 
 using namespace mitsake;
 
@@ -99,7 +100,7 @@ int compute_distance(TrieNode* node, std::string previous, std::string word,
         }
     }
 
-    if (distance <= treshold)
+    if (distance <= treshold && index < length)
     {
         // Deletion step
         int deletion = compute_distance(node, previous, word, index + 1,
@@ -169,6 +170,47 @@ int compute_distance(TrieNode* node, std::string previous, std::string word,
 
             // Transposition step
 
+            if (index + 1 < length)
+            {
+                for (unsigned int i = 0; i < son->child_count; i++)
+                {
+                    TrieLink* son_link = &(((TrieLink*)(&(son[1])))[i]);
+
+#if DEBUG_DIST && DEBUG_TRANS
+            std::cout << "Length : " << length
+                << ", Index : " << index
+                << ", Current label : " << link->l1.letter
+                << ", Current character : " << word[index]
+                << ", Next label : " << son_link->l1.letter
+                << ", Next character : " << word[index + 1]
+                << std::endl;
+#endif
+
+                    if (link->l1.letter == (127 & word[index + 1]) &&
+                        son_link->l1.letter == (127 & word[index]))
+                    {
+                        long offset = link->offset;
+                        TrieNode* grandson = (TrieNode*)&(son[-offset / sizeof (TrieNode)]);
+
+                        std::string next_next(next);
+                        next.push_back(son_link->l1.letter);
+
+#if DEBUG_DIST && DEBUG_TRANS
+            std::cout << "Transposition step ==> "
+                <<  "label : " << next_next << ", dist : " << distance << std::endl;
+#endif
+
+                        int transposition = compute_distance(grandson,
+                                next_next, word, index + 2, length, distance + 1, treshold);
+
+#if DEBUG_DIST && DEBUG_TRANS
+            std::cout << "Transposition after step ==> ins : " << transposition
+                << " , result : " << result << ", label : " << next_next << ", dist : " << distance << std::endl;
+#endif
+                        result = std::min(result, transposition);
+                    }
+                }
+            }
         }
     }
 
