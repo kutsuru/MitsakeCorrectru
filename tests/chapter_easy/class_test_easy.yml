@@ -1,5 +1,5 @@
-ref: 'echo approx 2 dice | ../ref64/TextMiningApp chapter_easy.dic'
-command: 'echo approx 2 dice | ../../src/app chapter_easy.dic'
+ref: 'echo approx 2 dice | ref32/TextMiningApp chapter_easy/chapter_easy_ref.dic'
+command: 'echo approx 2 dice | ../src/app chapter_easy/chapter_easy.dic'
 stdout:
 stderr:
 retval:

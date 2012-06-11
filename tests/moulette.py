@@ -46,6 +46,7 @@ class Moulette:
         self.verbose_mode = option.verbose
         self.info_mode = option.info
         self.chapter_mode = option.chapters
+        self.time = option.time
 
     def __init_chapter__(self):
         self.current_count = 0
@@ -85,7 +86,7 @@ class Moulette:
         for chapter in chapters_list:
             self.chapter(chapter)
 
-        self.summary()
+        self.summary(self.test_succeed, self.test_fail, self.test_count)
 
     def chapter(self, chapter):
         test_files_list = glob.glob(chapter + "/*.yml")
@@ -95,6 +96,8 @@ class Moulette:
 
         self.__init_chapter__()
         self.chapter_count += 1
+
+        print "\n\n\t>>> Chapter : " + chapter_name
 
         for test_file in test_files_list:
             code = self.test(test_file)
@@ -109,6 +112,8 @@ class Moulette:
         else:
             self.chapter_succeed += 1
             print "\t" + self.OK + " Chapter tested --- " + chapter_name
+
+        self.summary(self.current_succeed, self.current_fail, self.current_count)
 
     def test(self, test_file):
         test = open (test_file, 'r')
@@ -125,10 +130,12 @@ class Moulette:
         self.current_count += 1
 
         if data['ref']:
+            ref_start_time = time.clock()
             reference_process = subprocess.Popen(['/bin/sh', '-c', data['ref']],
                                     stdin = subprocess.PIPE,
                                     stdout = subprocess.PIPE,
                                     stderr = subprocess.PIPE)
+            self.ref_time = time.clock() - ref_start_time
 
             (ref_stdout, ref_stderr) = reference_process.communicate('')
             ref_rtcode = reference_process.returncode
@@ -141,21 +148,23 @@ class Moulette:
         if self.info_mode and data['info']:
             print "\t >>> Info: " + data['info']
 
+        process_start_time = time.clock()
         process = subprocess.Popen(['/bin/sh', '-c', data['command']],
                                     stdin = subprocess.PIPE,
                                     stdout = subprocess.PIPE,
                                     stderr = subprocess.PIPE)
+        self.process_time = time.clock() - process_start_time
 
         (test_stdout, test_stderr) = process.communicate('')
         test_rtcode = process.returncode
+
+        result = 0
 
         if (test_stdout == ref_stdout and test_stderr == ref_stderr and
                 test_rtcode == ref_rtcode):
 
             self.current_succeed += 1
             print "\t\t" + self.OK + " File tested --- " + test_file_name
-
-            return 0
 
         else:
             self.current_fail += 1
@@ -182,18 +191,27 @@ class Moulette:
                             + str(ref_rtcode)
                 print
 
-            return 1
+            result = 1
 
-    def summary(self):
-        print "Summary:"
+        if self.time:
+
+            if data['ref']:
+                print "\t\t\tRef time\t: \t" + str(self.ref_time)
+
+            print "\t\t\tProcess time\t: \t\033[92m" + str(self.process_time) + "\033[0m"
+
+        return result
+
+    def summary(self, test_succeed, test_fail, test_count):
+        print "\nSummary:"
 
         if self.test_count:
             print "\t\033[92m[%i%s][%i/%i]\033[0m tests succeeded this check" % (
-                float(self.test_succeed) / float(self.test_count) * 100,
-                u"\u0025", self.test_succeed, self.test_count)
+                float(test_succeed) / float(test_count) * 100,
+                u"\u0025", test_succeed, test_count)
             print "\t\033[91m[%i%s][%i/%i]\033[0m tests failed this check" % (
-                float(self.test_fail) / float(self.test_count) * 100,
-                u"\u0025", self.test_fail, self.test_count)
+                float(test_fail) / float(test_count) * 100,
+                u"\u0025", test_fail, test_count)
         else:
             print "\tNot a single test was parsed !!!"
 
@@ -219,6 +237,12 @@ def main():
                              dest = "chapters",
                              default = None,
                              help = "allow the user to specify chapter(s)")
+
+    option_parser.add_option("-t", "--time",
+                             action = "store_true",
+                             dest = "time",
+                             default = False,
+                             help = "display the time process execution")
 
     (option, args) = option_parser.parse_args()
 
