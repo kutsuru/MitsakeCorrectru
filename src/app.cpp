@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <set>
 #include <algorithm>
 #include <unistd.h>
 #include <fcntl.h>
@@ -9,6 +10,7 @@
 
 #include "trie-dummy.hpp"
 #include "trie-fast.hpp"
+#include "sort-struct.hpp"
 
 #define DEBUG_DIST 1
 #define DEBUG_DESCENT 0
@@ -17,10 +19,16 @@
 #define DEBUG_INS 0
 #define DEBUG_TRANS 1
 
+#define MAP 1
+#define SET 0
+
 using namespace mitsake;
 
-
+#if MAP
 static std::map<std::string, std::pair<unsigned int, unsigned int> > suggestion;
+#else
+static std::set<SortStruct, SortStructCompare> suggestions;
+#endif
 
 void node_call(TrieNode* node, std::string previous) {
 
@@ -88,10 +96,15 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
 #if DEBUG_DIST
         std::cout << "Working word : " << previous << std::endl;
 #endif
-        std::pair<unsigned int, unsigned int> df(distance, node->frequency);
 
+#if MAP
+        std::pair<unsigned int, unsigned int> df(distance, node->frequency);
         suggestion.insert(std::pair<std::string, std::pair<unsigned int, unsigned int> >
                 (previous, df));
+#else
+        SortStruct* triple = new SortStruct(distance, node->frequency, previous);
+        suggestions.insert(*triple);
+#endif
         result = length;
     }
 
@@ -270,6 +283,7 @@ int main(int argc, char** argv) {
                         });
 #endif
 
+#if MAP
                 std::map<std::string, std::pair<unsigned int, unsigned int> >::iterator rit = suggestion.end();
 
                 if (suggestion.size () > 0)
@@ -289,6 +303,28 @@ int main(int argc, char** argv) {
                 }
 
                 std::cout << "]" << std::endl;
+#else
+
+                std::set<SortStruct, SortStructCompare>::iterator rit = suggestionis.end();
+
+                if (suggestions.size () > 0)
+                    --rit; // Save the iterator before the last element
+
+                std::cout << "[";
+                
+                for (std::set<SortStruct, SortStructCompare>::iterator it = suggestions.begin();
+                     it != suggestions.end( ) ; ++it)
+                {
+                    std::cout << "{\"word\":\"" << it->word
+                              << "\",\"freq\":" << it->frequency
+                              << ",\"distance\":" << it->distance << "}";
+
+                    if (it != rit)
+                        std::cout << ",";
+                }
+
+                std::cout << "]" << std::endl;
+#endif
             }
         }
         else
