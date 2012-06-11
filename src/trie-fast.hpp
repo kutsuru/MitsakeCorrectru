@@ -3,6 +3,12 @@
 
 namespace mitsake {
 
+    /**
+     * Compressed Trie Link Letter
+     * store the character and a bit "used"
+     * (tell the iteration to continue)
+     * on one char.
+     */
     struct s_TrieLinkLetter {
         const unsigned char   letter      : 7;
         const unsigned char   used        : 1;
@@ -14,6 +20,14 @@ namespace mitsake {
     } __attribute__((packed));
     typedef struct s_TrieLinkLetter TrieLinkLetter;
 
+    /**
+     * A link can be compressed up to 4 letters
+     * (0) - a -> (1) - b -> (2)
+     * => (0)  - ab -> (2)
+     * The letter.used bit tell if the iteration can continue
+     *
+     * Unused currently
+     */
     struct s_TrieLink {
         TrieLinkLetter l1;
         TrieLinkLetter l2;
@@ -27,6 +41,12 @@ namespace mitsake {
     } __attribute__((packed));
     typedef struct s_TrieLink TrieLink;
 
+    /**
+     * Compressed Trie Node (see Tightly Packed Tries)
+     * [frequency]
+     * [child_count]
+     * [letter - node offset]*
+     */
     struct s_TrieNode {
         unsigned int frequency;
         unsigned int child_count;

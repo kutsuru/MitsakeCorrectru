@@ -78,7 +78,7 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
 #if DEBUG_DIST
     std::cout << "Current Node -> " << previous << " : "
         << node->child_count << " children, dist = " << distance
-        << ", treshold : " << treshold 
+        << ", treshold : " << treshold
         << ", label : " << previous << ", index : " << index
         << std::endl;
 #endif
@@ -98,7 +98,7 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
                 length, distance + 1, treshold);
         result = std::min(result, deletion);
 
-#if DEBUG_DIST && DEBUG_DEL      
+#if DEBUG_DIST && DEBUG_DEL
         std::cout << "Deletion step ==> del : " << deletion
             << " , result : " << result << std::endl;
 #endif
@@ -127,7 +127,7 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
             else
                 mdistance = 1;
 
-#if DEBUG_DIST && DEBUG_SUB      
+#if DEBUG_DIST && DEBUG_SUB
             std::cout << "Substitution step ==> "
                 <<  "label : " << next << ", dist : " << distance << ", mdist : " << mdistance << std::endl;
 #endif
@@ -137,7 +137,7 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
                     treshold);
             result = std::min(result, substitution);
 
-#if DEBUG_DIST && DEBUG_SUB      
+#if DEBUG_DIST && DEBUG_SUB
             std::cout << "Substitution after step ==> sub : " << substitution
                 << " , result : " << result << ", label : " << next << ", dist : " << distance << std::endl;
 #endif
@@ -187,7 +187,7 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
                         next_next.push_back(son_link->l1.letter);
 
                         unsigned int transposition = -1;
-                        
+
                         if (grandson)
                         {
 #if DEBUG_DIST && DEBUG_TRANS
@@ -252,6 +252,7 @@ int main(int argc, char** argv) {
             {
                 if (command.compare("quit") == 0)
                     break; 
+
 #if DEBUG
                 std::cout << "Command : " << command << std::endl;
                 std::cout << "Treshold: " << treshold << std::endl;

@@ -1,19 +1,21 @@
-
 CXX=g++
 FLAGS=-g -ggdb -pedantic -Wall
 FLAGS= -O3 -pedantic -Wall
 
 all: compiler app
 
-compiler: compiler.cpp trie-dummy.hpp trie-fast.hpp
-	${CXX} compiler.cpp -o compiler ${FLAGS}
+compiler: src/compiler.cpp src/trie-dummy.hpp src/trie-fast.hpp
+	${CXX} src/compiler.cpp -o ./compiler ${FLAGS}
 
-app: app.cpp trie-dummy.hpp trie-fast.hpp
-	${CXX} app.cpp -o app ${FLAGS}
+app: src/app.cpp src/trie-dummy.hpp src/trie-fast.hpp
+	${CXX} src/app.cpp -o app ${FLAGS}
 
 test: compiler app
 	./compiler ./testing.txt ./out.bin
 	./app ./out.bin
+
+doc:
+	doxygen Doxyfile
 
 check1: compiler app
 	./compiler ./testing.txt ./out.bin
@@ -21,5 +23,5 @@ check1: compiler app
 	diff result ./testing.txt
 
 clean:
-	rm -f compiler app
+	rm -rf compiler app doc
 	rm -f *.bin
