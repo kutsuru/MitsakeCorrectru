@@ -5,6 +5,13 @@
 #include "trie-dummy.hpp"
 #include "trie-fast.hpp"
 
+
+/**
+ * Dummy compiler,
+ * load the given dict file,
+ * construct the dummy trie,
+ * dump a compressed version to the given file.
+ */
 int main(int argc, char** argv) {
     std::ifstream file_in (argv[1]);
     int count = 0;
