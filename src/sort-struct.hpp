@@ -16,17 +16,15 @@ namespace mitsake
         {
         }
 
+        bool operator<(const s_SortStruct& s) const
+        {
+            return (distance < s.distance
+                    || (distance == s.distance && frequency > s.frequency)
+                    || (frequency == s.frequency && word.compare(s.word) < 0));
+        }
+
     };
     typedef struct s_SortStruct SortStruct;
-
-    struct SortStructCompare
-    {
-        bool operator()(const SortStruct& s1, const SortStruct& s2) const
-        {
-            return (s1.distance < s2.distance && s1.frequency > s2.frequency
-                    && (s1.word.compare(s2.word) < 0));
-        }
-    };
 }
 
 #endif

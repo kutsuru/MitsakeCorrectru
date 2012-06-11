@@ -73,7 +73,7 @@ class Moulette:
         for i in "......":
             sys.stdout.write(i)
             sys.stdout.flush()
-            time.sleep(0.5)
+            #time.sleep(0.5)
         print ".\n"
 
     def main(self):

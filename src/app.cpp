@@ -12,23 +12,16 @@
 #include "trie-fast.hpp"
 #include "sort-struct.hpp"
 
-#define DEBUG_DIST 1
+#define DEBUG_DIST 0
 #define DEBUG_DESCENT 0
 #define DEBUG_DEL 0
-#define DEBUG_SUB 1
+#define DEBUG_SUB 0
 #define DEBUG_INS 0
-#define DEBUG_TRANS 1
-
-#define MAP 1
-#define SET 0
+#define DEBUG_TRANS 0
 
 using namespace mitsake;
 
-#if MAP
-static std::map<std::string, std::pair<unsigned int, unsigned int> > suggestion;
-#else
-static std::set<SortStruct, SortStructCompare> suggestions;
-#endif
+static std::set<SortStruct> suggestions;
 
 void node_call(TrieNode* node, std::string previous) {
 
@@ -74,7 +67,7 @@ TrieNode* recursive_descent(unsigned int* mapped) {
 }
 
 unsigned int compute_distance(TrieNode* node, std::string previous, std::string& word,
-        int index, int length, int distance, int treshold)
+        int index, int length, unsigned short distance, int treshold)
 {
     if (distance > treshold)
         return distance;
@@ -93,18 +86,8 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
     if (node->frequency != 0 &&
         distance + length - (index + 1) < treshold)
     {
-#if DEBUG_DIST
-        std::cout << "Working word : " << previous << std::endl;
-#endif
-
-#if MAP
-        std::pair<unsigned int, unsigned int> df(distance, node->frequency);
-        suggestion.insert(std::pair<std::string, std::pair<unsigned int, unsigned int> >
-                (previous, df));
-#else
-        SortStruct* triple = new SortStruct(distance, node->frequency, previous);
-        suggestions.insert(*triple);
-#endif
+        SortStruct triple(distance, node->frequency, previous);
+        suggestions.insert(triple);
         result = length;
     }
 
@@ -233,6 +216,15 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
     return result;
 }
 
+void erase_duplicata()
+{
+    std::set<std::string> unique_result;
+
+    for (auto &triple : suggestions)
+        if (!(unique_result.insert(triple.word)).second)
+            suggestions.erase(triple);
+}
+
 int main(int argc, char** argv) {
 
     if (argc > 1)
@@ -260,59 +252,29 @@ int main(int argc, char** argv) {
             {
                 if (command.compare("quit") == 0)
                     break; 
-
+#if DEBUG
                 std::cout << "Command : " << command << std::endl;
                 std::cout << "Treshold: " << treshold << std::endl;
                 std::cout << "Word : " << word << std::endl;
+#endif
 
                 if (command.compare("approx") == 0)
-                    std::cout << "Result : "
-                        << compute_distance(root, "", word, 0,
-                                       word.length(), 0, treshold)
-                        << std::endl;
-
+                    compute_distance(root, "", word, 0, word.length(), 0,
+                                     treshold);
                 else
                     std::cout << "Unknown command, you can only use approx"
                         << std::endl;
 
-#if 0
-                std::for_each (suggestion.begin(), suggestion.end(),
-                        [](typename std::map<std::string, unsigned int>::iterator it)
-                        {
-                        std::cout << "(" << it->first << ", " << it->second << ")" << std::endl;
-                        });
-#endif
+                erase_duplicata();
 
-#if MAP
-                std::map<std::string, std::pair<unsigned int, unsigned int> >::iterator rit = suggestion.end();
-
-                if (suggestion.size () > 0)
-                    --rit; // Save the iterator before the last element
-
-                std::cout << "[";
-                
-                for (std::map<std::string, std::pair<unsigned int, unsigned int> >::iterator it = suggestion.begin();
-                     it != suggestion.end( ) ; ++it)
-                {
-                    std::cout << "{\"word\":\"" << it->first
-                              << "\",\"freq\":" << it->second.second
-                              << ",\"distance\":" << it->second.first << "}";
-
-                    if (it != rit)
-                        std::cout << ",";
-                }
-
-                std::cout << "]" << std::endl;
-#else
-
-                std::set<SortStruct, SortStructCompare>::iterator rit = suggestionis.end();
+                std::set<SortStruct>::iterator rit = suggestions.end();
 
                 if (suggestions.size () > 0)
                     --rit; // Save the iterator before the last element
 
                 std::cout << "[";
                 
-                for (std::set<SortStruct, SortStructCompare>::iterator it = suggestions.begin();
+                for (std::set<SortStruct>::iterator it = suggestions.begin();
                      it != suggestions.end( ) ; ++it)
                 {
                     std::cout << "{\"word\":\"" << it->word
@@ -324,7 +286,6 @@ int main(int argc, char** argv) {
                 }
 
                 std::cout << "]" << std::endl;
-#endif
             }
         }
         else
