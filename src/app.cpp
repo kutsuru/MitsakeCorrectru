@@ -253,7 +253,7 @@ int main(int argc, char** argv) {
                 if (command.compare("quit") == 0)
                     break; 
 
-#if DEBUG
+#if DEBUG_DIST
                 std::cout << "Command : " << command << std::endl;
                 std::cout << "Treshold: " << treshold << std::endl;
                 std::cout << "Word : " << word << std::endl;

@@ -135,9 +135,9 @@ class Moulette:
                                     stdin = subprocess.PIPE,
                                     stdout = subprocess.PIPE,
                                     stderr = subprocess.PIPE)
-            self.ref_time = time.clock() - ref_start_time
 
             (ref_stdout, ref_stderr) = reference_process.communicate('')
+            self.ref_time = time.clock() - ref_start_time
             ref_rtcode = reference_process.returncode
 
         else:
@@ -153,9 +153,9 @@ class Moulette:
                                     stdin = subprocess.PIPE,
                                     stdout = subprocess.PIPE,
                                     stderr = subprocess.PIPE)
-        self.process_time = time.clock() - process_start_time
 
         (test_stdout, test_stderr) = process.communicate('')
+        self.process_time = time.clock() - process_start_time
         test_rtcode = process.returncode
 
         result = 0
