@@ -17,14 +17,15 @@ def mixup_word(word):
     return word
 
 
-def gen_test(words):
-    r = []
-    for i in range(len(words) * 10):
-        d = random.randint(0, 5)
-        word = mixup_word(random.choice(words))
-        r.append("approx %s %s\n" % (d, word))
+def gen_test(words, path):
 
-    return r
+    with open(path, "w") as f:
+        for i in range(len(words) * 10):
+            d = random.randint(0, 5)
+            word = mixup_word(random.choice(words))
+            l = "approx %s %s\n" % (d, word)
+            f.write(l)
+    return None
 
 
 def main(args):
@@ -61,9 +62,7 @@ def main(args):
 
         print "test generation"
         words = map(lambda x: x.split()[0], lines)
-        lines = gen_test(words)
-        with open(path_tst, "w") as f:
-            f.writelines(lines)
+        lines = gen_test(words, path_tst)
 
         print "gen yaml"
 
@@ -75,7 +74,6 @@ def main(args):
             "retval": "",
             "info": "",
         }
-        print dir(yaml)
 
         with open(path_yml, "w") as f:
             yaml.dump(d, f)
