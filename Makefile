@@ -17,16 +17,15 @@ test: compiler app
 doc:
 	doxygen Doxyfile
 
-check1: compiler app
-	./compiler ./testing.txt ./out.bin
-	./app ./out.bin > result
-	diff result ./testing.txt
-
 gen:
 	cd tests && ./generator.py *.txt
 
 check:
 	cd tests && ./moulette.py
+
+time:
+	cd tests && ./moulette.py -t
+
 
 clean:
 	rm -rf compiler app doc

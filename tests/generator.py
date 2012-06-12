@@ -20,11 +20,13 @@ def mixup_word(word):
 def gen_test(words, path):
 
     with open(path, "w") as f:
-        for i in range(len(words) * 10):
-            d = random.randint(0, 5)
-            word = mixup_word(random.choice(words))
-            l = "approx %s %s\n" % (d, word)
-            f.write(l)
+        for i in range(len(words)):
+            lines = []
+            for j in range(random.randint(3, 10)):
+                d = random.randint(0, 5)
+                word = mixup_word(random.choice(words))
+                lines.append("approx %s %s\n" % (d, word))
+            f.writelines(lines)
     return None
 
 
