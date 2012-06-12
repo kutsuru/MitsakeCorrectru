@@ -86,6 +86,12 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
     if (node->frequency != 0 &&
         distance + length - (index + 1) < treshold)
     {
+
+#if DEBUG_DIST
+        std::cout << "TRY => Working word : " << previous << ", distance : " << distance
+                  << ", frequency : " << node->frequency << std::endl;
+#endif
+
         SortStruct triple(distance, node->frequency, previous);
         suggestions.insert(triple);
         result = length;
@@ -220,9 +226,38 @@ void erase_duplicata()
 {
     std::set<std::string> unique_result;
 
+    for (std::set<SortStruct>::iterator it = suggestions.begin();
+            it != suggestions.end( ) ; ++it)
+    {
+        if (!(unique_result.insert(it->word)).second)
+        {
+#if DEBUG_DIST
+            std::cout << "TRY-1 Erasing word : " << it->word
+                      << ", distance : " << it->distance << std::endl;
+#endif
+            suggestions.erase(it--);
+        }
+#if DEBUG_DIST
+        else
+            std::cout << "TRY-1 Keeping word : " << it->word
+                      << ", distance : " << it->distance << std::endl;
+#endif
+    }
+#if 0
+    unique_result.clear();
+
     for (auto &triple : suggestions)
+    {
         if (!(unique_result.insert(triple.word)).second)
-            suggestions.erase(triple);
+        {
+            std::cout << "TRY-2 Erasing word : " << triple.word
+                      << ", distance : " << triple.distance << std::endl;
+        }
+        else
+            std::cout << "TRY-2 Keeping word : " << triple.word
+                      << ", distance : " << triple.distance << std::endl;
+    }
+#endif
 }
 
 int main(int argc, char** argv) {
@@ -260,8 +295,11 @@ int main(int argc, char** argv) {
 #endif
 
                 if (command.compare("approx") == 0)
+                {
+                    suggestions.clear();
                     compute_distance(root, "", word, 0, word.length(), 0,
                                      treshold);
+                }
                 else
                     std::cout << "Unknown command, you can only use approx"
                         << std::endl;
