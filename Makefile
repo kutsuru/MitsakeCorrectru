@@ -22,6 +22,12 @@ check1: compiler app
 	./app ./out.bin > result
 	diff result ./testing.txt
 
+gen:
+	cd tests && ./generator.py *.txt
+
+check:
+	cd tests && ./moulette.py
+
 clean:
 	rm -rf compiler app doc
 	rm -f *.bin
