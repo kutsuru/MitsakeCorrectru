@@ -1,6 +1,0 @@
-ref: 'echo approx 5 dice | ref64/TextMiningApp chapter_easy/chapter_easy_ref.dic 2>/dev/null'
-command: 'echo approx 5 dice | ../app chapter_easy/chapter_easy.dic'
-stdout:
-stderr:
-retval:
-info:
