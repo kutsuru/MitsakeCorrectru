@@ -34,9 +34,12 @@ def gen_test(words, folder, prefix, app_refp, app_usp):
         with open(os.path.join(folder, prefix + str(i) + ".tst"), "w") as f:
             f.writelines(lines)
 
+        f_ref = os.path.join(folder, prefix)
+        f_prefix = os.path.join(folder, prefix + str(i))
+
         dic = {
-            "ref": "cat %s | %s %s 2>/dev/null" % (prefix + str(i) + ".tst", app_refp, prefix + ".ref"),
-            "command": "cat %s | %s %s 2>/dev/null" % (prefix + str(i) + ".tst", app_usp, prefix + ".us"),
+            "ref": "cat %s | %s %s 2>/dev/null" % (f_prefix + ".tst", app_refp, f_ref + ".ref"),
+            "command": "cat %s | %s %s 2>/dev/null" % (f_prefix + ".tst", app_usp, f_ref + ".us"),
             "stdout": "",
             "stderr": "",
             "retval": "",
@@ -56,8 +59,8 @@ def main(args):
     comp_refp = "./TextMiningCompiler"
     comp_usp = "../compiler"
 
-    app_refp = "../../TextMiningApp"
-    app_usp = "../../app"
+    app_refp = "./TextMiningApp"
+    app_usp = "../app"
 
     for path in files:
         prefix = ".".join(path.split(".")[:-1])
