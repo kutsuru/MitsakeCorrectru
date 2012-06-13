@@ -17,16 +17,37 @@ def mixup_word(word):
     return word
 
 
-def gen_test(words, path):
+def gen_test(words, folder, prefix, app_refp, app_usp):
 
-    with open(path, "w") as f:
-        for i in range(len(words)):
-            lines = []
-            for j in range(random.randint(3, 10)):
-                d = random.randint(0, 5)
-                word = mixup_word(random.choice(words))
-                lines.append("approx %s %s\n" % (d, word))
+    i = 0
+    l = len(words)
+    step = 1000
+
+    while (i * step < l):
+        print "test-id:", i
+        lines = []
+        for j in range(step):
+            d = random.randint(0, 3)
+            word = mixup_word(random.choice(words))
+            lines.append("approx %s %s\n" % (d, word))
+
+        with open(os.path.join(folder, prefix + str(i) + ".tst"), "w") as f:
             f.writelines(lines)
+
+        dic = {
+            "ref": "cat %s | %s %s 2>/dev/null" % (prefix + str(i) + ".tst", app_refp, prefix + ".ref"),
+            "command": "cat %s | %s %s 2>/dev/null" % (prefix + str(i) + ".tst", app_usp, prefix + ".us"),
+            "stdout": "",
+            "stderr": "",
+            "retval": "",
+            "info": "",
+        }
+
+        with open(os.path.join(folder, prefix + str(i) + ".yml"), "w") as f:
+            yaml.dump(dic, f)
+
+        i += 1
+
     return None
 
 
@@ -47,10 +68,8 @@ def main(args):
         except Exception as e:
             print "mkdir %s failed, exception: %s" % (folder, e)
 
-        path_tst = os.path.join(folder, prefix + ".tst")
         path_ref = os.path.join(folder, prefix + ".ref")
         path_us = os.path.join(folder, prefix + ".us")
-        path_yml = os.path.join(folder, prefix + ".yml")
 
         with open(path, "r") as f:
             lines = f.readlines()
@@ -64,21 +83,7 @@ def main(args):
 
         print "test generation"
         words = map(lambda x: x.split()[0], lines)
-        lines = gen_test(words, path_tst)
-
-        print "gen yaml"
-
-        d = {
-            "ref": "cat %s | %s %s 2>/dev/null" % (prefix + ".tst", app_refp, prefix + ".ref"),
-            "command": "cat %s | %s %s 2>/dev/null" % (prefix + ".tst", app_usp, prefix + ".us"),
-            "stdout": "",
-            "stderr": "",
-            "retval": "",
-            "info": "",
-        }
-
-        with open(path_yml, "w") as f:
-            yaml.dump(d, f)
+        gen_test(words, folder, prefix, app_refp, app_usp)
 
 
 if __name__ == "__main__":
