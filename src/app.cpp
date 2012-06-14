@@ -68,93 +68,46 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
     unsigned int result = -1;
     int mdistance = -1;
 
-#if DEBUG_DIST
-    std::cout << "Current Node -> " << previous << " : "
-        << node->child_count << " children, dist = " << distance
-        << ", treshold : " << treshold
-        << ", label : " << previous << ", index : " << index
-        << std::endl;
-#endif
-
     if (node->frequency != 0 &&
-        distance + length - index <= treshold)
+        distance + length - index <= treshold &&
+        index <= length)
     {
-
-#if DEBUG_DIST
-        std::cout << "Insert word: " << previous << ", distance : " << distance
-                  << ", frequency : " << node->frequency << std::endl;
-#endif
         SortStruct triple(distance + length - index, node->frequency, previous);
         suggestions.insert(triple);
         result = distance + length - index;
     }
-
-    if (distance <= treshold && index < length)
+    if  (distance <= treshold)
     {
         // Deletion step
         unsigned int deletion = compute_distance(node, previous, word, index + 1,
                 length, distance + 1, treshold);
         result = std::min(result, deletion);
 
-#if DEBUG_DIST && DEBUG_DEL
-        std::cout << "Deletion step ==> del : " << deletion
-            << " , result : " << result << std::endl;
-#endif
-
         for (unsigned int i = 0; i < node->child_count; i++)
         {
             TrieLink* link = &(((TrieLink*)(&(node[1])))[i]);
-
             long offset = link->offset;
             TrieNode* son = (TrieNode*)&(node[-offset / sizeof (TrieNode)]);
 
             std::string next(previous);
             next.push_back(link->l1.letter);
 
-#if DEBUG_DIST && DEBUG_SUB
-            std::cout << "Length : " << length
-                << ", Index : " << index
-                << ", Current label : " << link->l1.letter
-                << ", Current character : " << word[index]
-                << std::endl;
-#endif
+            if (index < length)
+            {
+                //Substitution step
+                if (length > index && (link->l1.letter == (127 & word[index])))
+                    mdistance = 0;
+                else
+                    mdistance = 1;
 
-            //Substitution step
-            if (length > index && (link->l1.letter == (127 & word[index])))
-                mdistance = 0;
-            else
-                mdistance = 1;
+                compute_distance(son, next, word, index + 1,
+                        length, distance + mdistance,
+                        treshold);
+            }
 
-#if DEBUG_DIST && DEBUG_SUB
-            std::cout << "Substitution step ==> "
-                <<  "label : " << next << ", dist : " << distance << ", mdist : " << mdistance << std::endl;
-#endif
-
-            unsigned int substitution = compute_distance(son, next, word, index + 1,
-                    length, distance + mdistance,
-                    treshold);
-            result = std::min(result, substitution);
-
-#if DEBUG_DIST && DEBUG_SUB
-            std::cout << "Substitution after step ==> sub : " << substitution
-                << " , result : " << result << ", label : " << next << ", dist : " << distance << std::endl;
-#endif
-
-#if DEBUG_DIST && DEBUG_INS
-            std::cout << "Insertion step ==> "
-                <<  "label : " << next << ", dist : " << distance << std::endl;
-#endif
-
-            // Insertion step
-            unsigned int insertion = compute_distance(son, next, word, index,
+            // Insertion
+            compute_distance(son, next, word, index,
                     length, distance + 1, treshold);
-
-            result = std::min(result, insertion);
-
-#if DEBUG_DIST && DEBUG_INS
-            std::cout << "Insertion after step ==> ins : " << insertion
-                << " , result : " << result << ", label : " << next << ", dist : " << distance << std::endl;
-#endif
 
             // Transposition step
             if (index + 1 < length)
@@ -162,17 +115,6 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
                 for (unsigned int i = 0; i < son->child_count; i++)
                 {
                     TrieLink* son_link = &(((TrieLink*)(&(son[1])))[i]);
-
-#if DEBUG_DIST && DEBUG_TRANS
-            std::cout << "Length : " << length
-                << ", Index : " << index
-                << ", Current label : " << next
-                << ", Current node character : " << link->l1.letter
-                << ", Current word character : " << word[index]
-                << ", Next node character : " << son_link->l1.letter
-                << ", Next word character : " << word[index + 1]
-                << std::endl;
-#endif
 
                     if (link->l1.letter == (127 & word[index + 1]))
                     {
@@ -182,27 +124,10 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
                         std::string next_next(next);
                         next_next.push_back(son_link->l1.letter);
 
-                        unsigned int transposition = -1;
-
                         if (grandson)
-                        {
-#if DEBUG_DIST && DEBUG_TRANS
-                            std::cout << "Transposition step ==> "
-                                << "label : " << next_next << ", dist : " << distance
-                                << ", grandson child : " << grandson->child_count << ", grandson freq : " << grandson->frequency
-                                << std::endl;
-#endif
-
-                            transposition = compute_distance(grandson, next_next, word,
-                                             index + 2, length, distance + 1,
+                            compute_distance(son, next, word,
+                                             index + 1, length, distance + 1,
                                              treshold);
-                        }
-
-#if DEBUG_DIST && DEBUG_TRANS
-            std::cout << "Transposition after step ==> ins : " << transposition
-                << " , result : " << result << ", label : " << next_next << ", dist : " << distance << std::endl;
-#endif
-                        result = std::min(result, transposition);
                     }
                 }
             }
