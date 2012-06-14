@@ -12,10 +12,10 @@
 #include "trie-fast.hpp"
 #include "sort-struct.hpp"
 
-#define DEBUG_DESCENT 0
-#define DEBUG_SUB 0
-#define DEBUG_INS 0
-#define DEBUG_TRANS 0
+#define LOLDEBUG_DESCENT 1
+#define LOLDEBUG_SUB 1
+#define LOLDEBUG_INS 1
+#define LOLDEBUG_TRANS 1
 
 using namespace mitsake;
 
@@ -82,15 +82,14 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
 #endif
 
     if (node->frequency != 0 &&
-        distance + length - (index + 1) < treshold)
+        distance + length - index <= treshold)
     {
 
 #if DEBUG_DIST
         std::cout << "TRY => Working word : " << previous << ", distance : " << distance
                   << ", frequency : " << node->frequency << std::endl;
 #endif
-
-        SortStruct triple(distance, node->frequency, previous);
+        SortStruct triple(distance + length - index, node->frequency, previous);
         suggestions.insert(triple);
         result = length;
     }
@@ -181,8 +180,7 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
                 << std::endl;
 #endif
 
-                    if (link->l1.letter == (127 & word[index + 1]) &&
-                        son_link->l1.letter == (127 & word[index]))
+                    if (link->l1.letter == (127 & word[index + 1]))
                     {
                         long offset = son_link->offset;
                         TrieNode* grandson = (TrieNode*)&(son[-offset / sizeof (TrieNode)]);
