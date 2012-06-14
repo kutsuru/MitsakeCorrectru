@@ -57,10 +57,10 @@ def gen_test(words, folder, prefix, app_refp, app_usp):
 def main(args):
     files = args[1:]
     comp_refp = "./TextMiningCompiler"
-    comp_usp = "../compiler"
+    comp_usp = "../TextMiningCompiler"
 
     app_refp = "./TextMiningApp"
-    app_usp = "../app"
+    app_usp = "../TextMiningApp"
 
     for path in files:
         prefix = ".".join(path.split(".")[:-1])
