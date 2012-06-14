@@ -122,7 +122,7 @@ class Moulette:
             data = yaml.load(test)
         except:
             print "\t\t" + self.PARSING_ERROR + " File tested --- "\
-                    + test_file_name
+                    + test_file
 
         test.close()
         (path, test_file_name) = os.path.split(test_file)
@@ -162,9 +162,8 @@ class Moulette:
 
         if (test_stdout == ref_stdout and test_stderr == ref_stderr and
                 test_rtcode == ref_rtcode):
-
             self.current_succeed += 1
-            print "\t\t" + self.OK + " File tested --- " + test_file_name
+            #print "\t\t" + self.OK + " File tested --- " + test_file_name
 
         else:
             self.current_fail += 1
@@ -173,6 +172,10 @@ class Moulette:
 
             if self.verbose_mode:
                 print
+                tst = ".".join(test_file.split(".")[:-1])
+                with open(tst + ".tst", "r") as f:
+                    print "".join(f.readlines())
+
                 if test_stdout != ref_stdout:
                     print "\t\t\t\033[91mBad stdout, unexpected:\
                             \n\t\t\t\033[0m"
@@ -207,10 +210,10 @@ class Moulette:
 
         if self.test_count:
             print "\t\033[92m[%i%s][%i/%i]\033[0m tests succeeded this check" % (
-                float(test_succeed) / float(test_count) * 100,
+                    (test_succeed / float(test_count) * 100) if test_count > 0 else 0,
                 u"\u0025", test_succeed, test_count)
             print "\t\033[91m[%i%s][%i/%i]\033[0m tests failed this check" % (
-                float(test_fail) / float(test_count) * 100,
+                    (test_fail / float(test_count) * 100) if test_count > 0 else 0,
                 u"\u0025", test_fail, test_count)
         else:
             print "\tNot a single test was parsed !!!"

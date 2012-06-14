@@ -21,9 +21,9 @@ def gen_test(words, folder, prefix, app_refp, app_usp):
 
     i = 0
     l = len(words)
-    step = 1000
+    step = 100
 
-    while (i * step < l):
+    while (i * step < l or i < 50):
         print "test-id:", i
         lines = []
         for j in range(step):
