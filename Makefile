@@ -1,6 +1,6 @@
 CXX=g++
-FLAGS=-g -ggdb -pedantic -Wall
-FLAGS= -O3 -pedantic -Wall -std=c++0x
+FLAGS=-g -ggdb -pedantic -Wall -std=c++0x -DDEBUG_DIST=1 -DDEBUG_DEL=1
+#FLAGS= -O3 -pedantic -Wall -std=c++0x
 
 all: TextMiningCompiler TextMiningApp
 

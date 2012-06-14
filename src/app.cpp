@@ -12,9 +12,7 @@
 #include "trie-fast.hpp"
 #include "sort-struct.hpp"
 
-#define DEBUG_DIST 0
 #define DEBUG_DESCENT 0
-#define DEBUG_DEL 0
 #define DEBUG_SUB 0
 #define DEBUG_INS 0
 #define DEBUG_TRANS 0
@@ -243,95 +241,85 @@ void erase_duplicata()
                       << ", distance : " << it->distance << std::endl;
 #endif
     }
-#if 0
-    unique_result.clear();
+}
 
-    for (auto &triple : suggestions)
+void suggestion_display(std::set<SortStruct> &suggestions) {
+    if (suggestions.size() == 0)
     {
-        if (!(unique_result.insert(triple.word)).second)
-        {
-            std::cout << "TRY-2 Erasing word : " << triple.word
-                      << ", distance : " << triple.distance << std::endl;
-        }
-        else
-            std::cout << "TRY-2 Keeping word : " << triple.word
-                      << ", distance : " << triple.distance << std::endl;
+        std::cout << "[" << "]" << std::endl;
+        return;
     }
-#endif
+
+    erase_duplicata();
+    std::set<SortStruct>::iterator rit = --(suggestions.end());
+
+    std::cout << "[";
+    for (std::set<SortStruct>::iterator it = suggestions.begin();
+         it != suggestions.end( ) ; ++it)
+    {
+        std::cout << "{\"word\":\"" << it->word
+                  << "\",\"freq\":" << it->frequency
+                  << ",\"distance\":" << it->distance << "}";
+
+        if (it != rit)
+            std::cout << ",";
+    }
+    std::cout << "]" << std::endl;
 }
 
 int main(int argc, char** argv) {
 
-    if (argc > 1)
+    if (argc < 2)
     {
-        struct stat fs;
-        stat(argv[1], &fs);
+        std::cout << "Usage: ./app words.dic" << std::endl;
+        return 1;
+    }
 
-        int fd = open(argv[1], O_RDONLY);
-        if (fd > -1)
-        {
-            int treshold = 0;
-            std::string word;
-            std::string command;
+    struct stat fs;
+    stat(argv[1], &fs);
+    int fd = open(argv[1], O_RDONLY);
 
-            unsigned int* mapped =
-                (unsigned int*) mmap(0, fs.st_size, PROT_READ, MAP_PRIVATE,
-                        fd, 0);
+    if (fd == -1)
+    {
+        std::cout << "Invalid file" << std::endl;
+        return 2;
+    }
 
-            TrieNode* root = recursive_descent(mapped);
+    int treshold = 0;
+    std::string word;
+    std::string command;
 
-            // Avoid overhead on I/O
-            std::cin.sync_with_stdio(false);
+    unsigned int* mapped = (unsigned int*) mmap(0, fs.st_size,
+                                                PROT_READ, MAP_PRIVATE,
+                                                fd, 0);
 
-            while (std::cin >> command >> treshold >> word)
-            {
-                if (command.compare("quit") == 0)
-                    break; 
+    TrieNode* root = recursive_descent(mapped);
+
+    // Avoid overhead on I/O
+    std::cin.sync_with_stdio(false);
+
+    while (std::cin >> command >> treshold >> word)
+    {
+        if (command.compare("quit") == 0)
+            break;
 
 #if DEBUG_DIST
-                std::cout << "Command : " << command << std::endl;
-                std::cout << "Treshold: " << treshold << std::endl;
-                std::cout << "Word : " << word << std::endl;
+        std::cout << "Command : " << command << std::endl;
+        std::cout << "Treshold: " << treshold << std::endl;
+        std::cout << "Word : " << word << std::endl;
 #endif
 
-                if (command.compare("approx") == 0)
-                {
-                    suggestions.clear();
-                    compute_distance(root, "", word, 0, word.length(), 0,
-                                     treshold);
-                }
-                else
-                    std::cout << "Unknown command, you can only use approx"
-                        << std::endl;
-
-                erase_duplicata();
-
-                std::set<SortStruct>::iterator rit = suggestions.end();
-
-                if (suggestions.size () > 0)
-                    --rit; // Save the iterator before the last element
-
-                std::cout << "[";
-                
-                for (std::set<SortStruct>::iterator it = suggestions.begin();
-                     it != suggestions.end( ) ; ++it)
-                {
-                    std::cout << "{\"word\":\"" << it->word
-                              << "\",\"freq\":" << it->frequency
-                              << ",\"distance\":" << it->distance << "}";
-
-                    if (it != rit)
-                        std::cout << ",";
-                }
-
-                std::cout << "]" << std::endl;
-            }
-        }
+        if (command.compare("approx") != 0)
+            std::cout << "Unknown command, you can only use approx"
+                << std::endl;
         else
-            std::cout << "Invalid file" << std::endl;
+        {
+            suggestions.clear();
+            compute_distance(root, "", word, 0, word.length(), 0,
+                             treshold);
+            suggestion_display(suggestions);
+        }
     }
-    else
-        std::cout << "Usage: ./app words.dic" << std::endl;
 
     return 0;
 }
