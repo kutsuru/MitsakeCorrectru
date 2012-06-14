@@ -12,11 +12,6 @@
 #include "trie-fast.hpp"
 #include "sort-struct.hpp"
 
-#define LOLDEBUG_DESCENT 1
-#define LOLDEBUG_SUB 1
-#define LOLDEBUG_INS 1
-#define LOLDEBUG_TRANS 1
-
 using namespace mitsake;
 
 static std::set<SortStruct> suggestions;
@@ -86,12 +81,12 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
     {
 
 #if DEBUG_DIST
-        std::cout << "TRY => Working word : " << previous << ", distance : " << distance
+        std::cout << "Insert word: " << previous << ", distance : " << distance
                   << ", frequency : " << node->frequency << std::endl;
 #endif
         SortStruct triple(distance + length - index, node->frequency, previous);
         suggestions.insert(triple);
-        result = length;
+        result = distance + length - index;
     }
 
     if (distance <= treshold && index < length)
@@ -160,7 +155,6 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
             std::cout << "Insertion after step ==> ins : " << insertion
                 << " , result : " << result << ", label : " << next << ", dist : " << distance << std::endl;
 #endif
-
 
             // Transposition step
             if (index + 1 < length)

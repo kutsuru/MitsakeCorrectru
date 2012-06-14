@@ -1,5 +1,5 @@
 CXX=g++
-FLAGS_DEBUG=-g -ggdb -pedantic -Wall -std=c++0x -DDEBUG_DIST=1 -DDEBUG_DEL=1
+FLAGS_DEBUG=-g -ggdb -pedantic -Wall -std=c++0x -DDEBUG_DIST=1 -DDEBUG_DEL=1 -DDEBUG_DESCENT=1 -DDEBUG_SUB=1 -DDEBUG_INS -DDEBUG_TRANS
 FLAGS= -O3 -pedantic -Wall -std=c++0x
 
 all: TextMiningCompiler TextMiningApp
