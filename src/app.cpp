@@ -59,7 +59,7 @@ TrieNode* recursive_descent(unsigned int* mapped) {
     return root;
 }
 
-unsigned int compute_distance(TrieNode* node, std::string previous, std::string& word,
+unsigned int compute_distance(TrieNode* node, std::string previous, std::string word,
         int index, int length, unsigned short distance, int treshold)
 {
     if (distance > treshold)
@@ -116,7 +116,8 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
                 {
                     TrieLink* son_link = &(((TrieLink*)(&(son[1])))[i]);
 
-                    if (link->l1.letter == (127 & word[index + 1]))
+                    if (link->l1.letter == (127 & word[index + 1]) &&
+                        son_link->l1.letter == (127 & word[index]))
                     {
                         long offset = son_link->offset;
                         TrieNode* grandson = (TrieNode*)&(son[-offset / sizeof (TrieNode)]);
@@ -125,10 +126,19 @@ unsigned int compute_distance(TrieNode* node, std::string previous, std::string&
                         next_next.push_back(son_link->l1.letter);
 
                         if (grandson)
-                            compute_distance(son, next, word,
-                                             index + 1, length, distance + 1,
+                            compute_distance(grandson, next_next, word,
+                                             index + 2, length, distance + 1,
                                              treshold);
                     }
+                    else if (link->l1.letter == (127 & word[index + 1]))
+                    {
+                        std::string word_modified = word;
+                        char l = word_modified[index + 1];
+                        word_modified[index + 1] = index;
+                        word_modified[index] = l;
+                        compute_distance(son, next, word_modified, index + 1, length, distance + 1, treshold);
+                    }
+
                 }
             }
         }
