@@ -104,21 +104,16 @@ On fait rentrer 4 TrieLink (char:7 pour le charactère et char:1 pour savoir si 
 (taille des int, 64 bits,...). Cette méthode nous ermet de compresser les noeuds avec un seul fils sur 4 niveaux.
 
  5.	Proposez un réglage automatique de la distance pour un programme qui prend juste une chaîne de caractères en entrée, donner le processus d’évaluation ainsi que les résultats
-On utiliserait des fonctions de statistique plus ou moins compliquées ... Mais
-est-ce réellement utile ? Le principe de la correction orthographique n'est pas
-de proposer tous les mots possibles avec une distance maximale, mais bien de
-proposer à un utilisateur un choix restreint mais correct. Pour cela, nous
-devons nous baser sur la quantité de mots présents au sein du dictionnaire
-puisqu'un faible nombre entrainerait une augmentation de la distance. De plus,
-la longueur du mot influe considérablement sur le nombre d'erreurs présentes, en
-supposant une moyenne d'erreurs typographiques de 30% par mot, on arriverait à
-une distance qui n'est ni trop grande ni trop petite.
 
-Donc une formule statistique représentant le ratio d'erreurs typographiques en
-fonction de sa longueur.
+On utiliserait des fonctions de statistique plus ou moins compliquées,
+en commencant par partir du principe que la longueur du mot influe considérablement
+sur le nombre d'erreurs présentes, en supposant une moyenne d'erreurs typographiques
+de 10% par caractères par exemple, on arriverait à adaptée. En améliorant cette
+approximation avec des bases de tests par exemple, pour trouver une formule statistique
+représentant le ratio d'erreurs typographiques en fonction de la longueur d'un mot.
 
  6.	Comment comptez vous améliorer les performances de votre programme
-    
+
     - Compresser le Trie en utilisant les link letter,
     - Faire de vrai optimisations sur le parcours de l'arbre, on entends par la couper
       plus tôt des parcours récursif,
