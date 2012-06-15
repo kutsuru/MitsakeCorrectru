@@ -3,6 +3,9 @@
 
 namespace mitsake
 {
+    /**
+    ** Dedicated struct for the spell checker result storage.
+    */
     struct s_SortStruct
     {
         unsigned short distance;
@@ -16,6 +19,9 @@ namespace mitsake
         {
         }
 
+        /**
+        ** Respect the sort order during the insertion.
+        */
         bool operator<(const s_SortStruct& s) const
         {
             return (distance < s.distance

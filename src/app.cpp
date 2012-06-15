@@ -38,6 +38,10 @@ TrieNode* recursive_descent(unsigned int* mapped)
     return root;
 }
 
+/**
+** Computation of the edit distance, implementation of the Damerau-Levenshtein
+** algorithm.
+*/
 void compute_distance(TrieNode* node, std::string previous, std::string word,
                       int index, int length, unsigned short distance,
                       int threshold, std::set<SortStruct>& suggestions)
@@ -45,6 +49,12 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
     if (distance > threshold)
         return;
 
+    /**
+    ** If the current node has a frequency, it means the word described by the
+    ** root node to this one exists in the dictionary. So if the distance
+    ** threshold is respected we will had the word to the spell checker
+    ** suggesitons.
+    */
     if (node->frequency != 0 &&
         distance + length - index <= threshold &&
         index <= length)
@@ -53,7 +63,11 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
         suggestions.insert(triple);
     }
 
-    // Deletion step
+    /**
+    **  Deletion step
+    **  We increment the index of the requested word while staying on the
+    **  current node.
+    */
     compute_distance(node, previous, word, index + 1, length, distance + 1,
                      threshold, suggestions);
 
@@ -70,7 +84,13 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
         {
             int mdistance = -1;
 
-            //Substitution step
+            /**
+            ** Substitution step
+            ** When the mdistance is equal to 0, it represents the main case,
+            ** the character on the node and the one pointed out by the index
+            ** are the same. But if they are different, we will increment the
+            ** distance.
+            */
             if (length > index && (link->l1.letter == (127 & word[index])))
                 mdistance = 0;
             else
@@ -81,11 +101,21 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
                              threshold, suggestions);
         }
 
-        // Insertion
+        /**
+        ** Insertion
+        ** While staying on the same index for the requested word, we will
+        ** continue the descent, it simulates the insertion process of
+        ** Levenshtein.
+        */
         compute_distance(son, next, word, index, length, distance + 1,
                          threshold, suggestions);
 
-        // Transposition step
+        /**
+        ** Transposition step
+        ** With an increased look ahead in the recursion process, we are able to
+        ** simulate the transposition process. In order to improve a little this
+        ** step we divided it in two case.
+        */
         if (index + 1 < length)
         {
             for (unsigned int i = 0; i < son->child_count; i++)
@@ -94,6 +124,13 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
 
                 if (link->l1.letter == (127 & word[index + 1]))
                 {
+                    /**
+                    ** This case reprensents the transposition between two
+                    ** mirrored sequences of two characters. In this case we can
+                    ** directly jump toward our increased look ahead.
+                    **
+                    ** Example: 'ab' <-> 'ba'.
+                    */
                     if (son_link->l1.letter == (127 & word[index]))
                     {
                         long offset = son_link->offset;
@@ -108,6 +145,13 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
                                              index + 2, length, distance + 1,
                                              threshold, suggestions);
                     }
+                    /**
+                    ** But the transposition can be later than we expecte it,
+                    ** for example image the 'cab' sequence on a 'abc' trie, you
+                    ** first have to transpose 'ca' <-> 'ac', while the matching
+                    ** sequence is 'ab', in order to be able to do later the
+                    ** real transposition 'cb' <-> 'bc'.
+                    */
                     else
                     {
                         std::string word_modified = word;
@@ -124,6 +168,12 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
     }
 }
 
+/**
+** When we try to insert inside the set a triple, if the word is already present but
+** the distance or the frequency differ then it will be inserted. We cannot
+** until the end of the insertion process if there will be a better triple. So
+** we have to erase all the duplicatas after the process.
+*/
 void erase_duplicata(std::set<SortStruct>& suggestions)
 {
     std::set<std::string> unique_result;
@@ -131,9 +181,12 @@ void erase_duplicata(std::set<SortStruct>& suggestions)
     for (std::set<SortStruct>::iterator it = suggestions.begin();
             it != suggestions.end( ) ; ++it)
         if (!(unique_result.insert(it->word)).second)
-            suggestions.erase(it--);
+            suggestions.erase(it--); // We have to reinsure about the iterator validity.
 }
 
+/**
+** Display function to match the reference output.
+*/
 void suggestion_display(std::set<SortStruct> &suggestions)
 {
     if (suggestions.size() == 0)
@@ -159,6 +212,9 @@ void suggestion_display(std::set<SortStruct> &suggestions)
     std::cout << "]" << std::endl;
 }
 
+/**
+** Just a main.
+*/
 int main(int argc, char** argv) {
 
     if (argc < 2)
