@@ -5,6 +5,9 @@ Spell Checker in C++,
 tightly packed tries implementation and adaptation:
     http://aclweb.org/anthology-new/W/W09/W09-1505.pdf
 
+The tarball version is provided with the pykolead project,
+small folder-search engine written in Python.
+
 
 Description
 -----------
@@ -38,6 +41,7 @@ Build & Use
     # generate the documentation
     make doc
 
+    # In the following, the reference must be placed in tests/ folder
     # generate the test suite (using the txt files in the tests folder)
     make gen
 
