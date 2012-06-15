@@ -31,6 +31,7 @@ Run the test suite
 
 * -t to time the executions
 * -v to activate verbose mode
+* -c to specify a dedicated chapter to test
 
 Build & Use
 -----------
@@ -51,9 +52,6 @@ Build & Use
     # bench the test suite
     make time
 
-    # basic test to check that the chain is working
-    make test
-
 TODO
 ----
 
@@ -73,6 +71,11 @@ ensuite ont génère une version compressée (C-style).
 l'application applique l'algorithme de distance en
 parcourant la version compressée.
 
+Etant donné la contrainte de mémoire imposée, nous avons décidé d'éviter toute
+implémentation à base de matrice. Nous sommes donc partis sur une simple
+descente sur notre trie. A chaque opération requise par l'algorithme
+Damerau-Levenshtein, nous poursuivons notre appel récursif.
+
 Cette double implémentation nous permet de modifier la structure
 de l'arbre facilement tant que la fonction de dump vers la structure
 C reste à jour.
@@ -88,7 +91,9 @@ dictionnaire de référence. Ce qui nous a poussé à choisir une structure de T
 sur 7 bits permettant d'utiliser le bit libre pour l'itération.
 
  3.	Avez-vous détecté des cas où la correction par distance ne fonctionnait pas (même avec une distance  élevée) ?
-TODO
+Pour l'instant nos résultats coincident avec ceux de la ref, en supposant que la
+ref est infaillible pour l'instant aucune correction ne s'est avérée fausse.
+Cependant nous ne pouvons avoir la certitude de notre infaillibilité.
 
  4.	Quelle est la structure de données que vous avez implémentée dans votre projet, pourquoi ?
 On utilise un tihgt,... titghl... un Trie compressé, en mmapant la structure directement,
@@ -99,16 +104,33 @@ On fait rentrer 4 TrieLink (char:7 pour le charactère et char:1 pour savoir si 
 (taille des int, 64 bits,...). Cette méthode nous ermet de compresser les noeuds avec un seul fils sur 4 niveaux.
 
  5.	Proposez un réglage automatique de la distance pour un programme qui prend juste une chaîne de caractères en entrée, donner le processus d’évaluation ainsi que les résultats
-On utiliserais des fonctions de statistique plus ou moins compliquées,
-TODO
+On utiliserait des fonctions de statistique plus ou moins compliquées ... Mais
+est-ce réellement utile ? Le principe de la correction orthographique n'est pas
+de proposer tous les mots possibles avec une distance maximale, mais bien de
+proposer à un utilisateur un choix restreint mais correct. Pour cela, nous
+devons nous baser sur la quantité de mots présents au sein du dictionnaire
+puisqu'un faible nombre entrainerait une augmentation de la distance. De plus,
+la longueur du mot influe considérablement sur le nombre d'erreurs présentes, en
+supposant une moyenne d'erreurs typographiques de 30% par mot, on arriverait à
+une distance qui n'est ni trop grande ni trop petite.
+
+Donc une formule statistique représentant le ratio d'erreurs typographiques en
+fonction de sa longueur.
 
  6.	Comment comptez vous améliorer les performances de votre programme
-Compresser le Trie en utilisant les link letter,
-faire de vrai optimisations sur le parcours de l'arbre,
-Précalculer les offsets au démarrage de l'application.
+    
+    - Compresser le Trie en utilisant les link letter,
+    - Faire de vrai optimisations sur le parcours de l'arbre, on entends par la couper
+      plus tôt des parcours récursif,
+    - Précalculer les offsets au démarrage de l'application,
+    - Parallèliser les différentes commandes en entrée. (Le fait de paralléliser
+      les opérations durant la descente sur le trie ne semble pas avantageux, en
+      effet après quelques tests avec la bibliothèque tbb d'un tel, nous avons
+      obtenu des performances médiocres (pour ne pas dire pire)).
 
  7.	Que manque-t-il à votre correcteur orthographique pour qu’il soit à l’état de l’art ?
 Le dictionnaire de Google :) L'utilisation des mots alentours pour pondèrer correctement les résultats
 permettrait d'améliorer facilement les résultats du correcteur.
-L'implémentation du Trie elle même pourrait être largement améliorée.
+L'implémentation du Trie elle même pourrait être largement améliorée ainsi que
+tous les points soulevés dans la partie optimisation possible.
 
