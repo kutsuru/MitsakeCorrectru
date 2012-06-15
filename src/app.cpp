@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <map>
 #include <set>
 #include <algorithm>
 #include <unistd.h>
@@ -13,8 +12,6 @@
 #include "sort-struct.hpp"
 
 using namespace mitsake;
-
-static std::set<SortStruct> suggestions;
 
 void node_call(TrieNode* node, std::string previous)
 {
@@ -43,7 +40,7 @@ TrieNode* recursive_descent(unsigned int* mapped)
 
 void compute_distance(TrieNode* node, std::string previous, std::string word,
                       int index, int length, unsigned short distance,
-                      int threshold)
+                      int threshold, std::set<SortStruct>& suggestions)
 {
     if (distance > threshold)
         return;
@@ -58,7 +55,7 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
 
     // Deletion step
     compute_distance(node, previous, word, index + 1, length, distance + 1,
-                     threshold);
+                     threshold, suggestions);
 
     for (unsigned int i = 0; i < node->child_count; i++)
     {
@@ -80,13 +77,13 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
                 mdistance = 1;
 
             compute_distance(son, next, word, index + 1,
-                    length, distance + mdistance,
-                    threshold);
+                             length, distance + mdistance,
+                             threshold, suggestions);
         }
 
         // Insertion
         compute_distance(son, next, word, index, length, distance + 1,
-                         threshold);
+                         threshold, suggestions);
 
         // Transposition step
         if (index + 1 < length)
@@ -109,7 +106,7 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
                         if (grandson)
                             compute_distance(grandson, next_next, word,
                                              index + 2, length, distance + 1,
-                                             threshold);
+                                             threshold, suggestions);
                     }
                     else
                     {
@@ -118,7 +115,8 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
                         word_modified[index + 1] = index;
                         word_modified[index] = l;
                         compute_distance(son, next, word_modified, index + 1,
-                                         length, distance + 1, threshold);
+                                         length, distance + 1, threshold,
+                                         suggestions);
                     }
                 }
             }
@@ -126,7 +124,7 @@ void compute_distance(TrieNode* node, std::string previous, std::string word,
     }
 }
 
-void erase_duplicata()
+void erase_duplicata(std::set<SortStruct>& suggestions)
 {
     std::set<std::string> unique_result;
 
@@ -136,14 +134,15 @@ void erase_duplicata()
             suggestions.erase(it--);
 }
 
-void suggestion_display(std::set<SortStruct> &suggestions) {
+void suggestion_display(std::set<SortStruct> &suggestions)
+{
     if (suggestions.size() == 0)
     {
         std::cout << "[" << "]" << std::endl;
         return;
     }
 
-    erase_duplicata();
+    erase_duplicata(suggestions);
     std::set<SortStruct>::iterator rit = --(suggestions.end());
 
     std::cout << "[";
@@ -201,9 +200,10 @@ int main(int argc, char** argv) {
                 << std::endl;
         else
         {
+            std::set<SortStruct> suggestions;
             suggestions.clear();
             compute_distance(root, "", word, 0, word.length(), 0,
-                             threshold);
+                             threshold, suggestions);
             suggestion_display(suggestions);
         }
     }
